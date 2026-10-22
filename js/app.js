@@ -673,13 +673,22 @@
     const clean = new URL(location.href); clean.searchParams.delete("couple");
     history.replaceState(null, "", clean.pathname + clean.search + clean.hash); // keep the key out of the address bar
   }
-  function lanternEl(w, i, mine) {
-    const [x, y, sc] = SLOTS[i % SLOTS.length];
-    const lap = Math.floor(i / SLOTS.length);
+  // Up to 16 wishes use the hand-placed SLOTS; beyond that, lanterns spread over loose staggered rows in a
+  // taller "field" that scrolls inside the sky, so no two lanterns ever sit on top of each other.
+  const ROW_PX = 92, COL_PX = 110;
+  function fieldSpot(i, cols, rows) {
+    const r = Math.floor(i / cols), c = i % cols;
+    const jx = ((i * 37) % 11) / 11 - 0.5, jy = ((i * 53) % 13) / 13 - 0.5; // steady wobble, same on every refresh
+    const x = (c + 0.5 + (r % 2 ? 0.2 : -0.2) + jx * 0.25) / cols * 100;
+    const y = (r + 0.5 + jy * 0.3) / rows * 100;
+    return [Math.min(94, Math.max(6, x)), y, 0.82 + (((i * 29) % 7) / 7) * 0.18];
+  }
+  function lanternEl(w, i, mine, spot) {
+    const [x, y, sc] = spot || SLOTS[i];
     const b = document.createElement("button");
     b.type = "button"; b.className = "lan" + (mine ? " lan--mine" : "") + (w.private ? " lan--private" : "");
-    b.style.left = (x + lap * 4) % 96 + "%"; b.style.top = Math.min(92, y + lap * 3) + "%";
-    b.style.setProperty("--sc", (sc * (lap ? 0.8 : 1)).toFixed(2));
+    b.style.left = x + "%"; b.style.top = y + "%";
+    b.style.setProperty("--sc", sc.toFixed(2));
     b.style.animationDelay = (-(i * 0.7) % 6).toFixed(1) + "s";
     b.setAttribute("aria-label", "Read the wish from " + w.name);
     b.innerHTML = '<span class="lan__body" aria-hidden="true"></span><span class="lan__name"></span>';
@@ -691,7 +700,18 @@
     lsky.innerHTML = "";
     const mine = store.get("wishes", []).filter((m) => m.visibility === "public" && !list.some((w) => w.id && w.id === m.id));
     wishesShown = mine.map((m) => [m, true]).concat(list.map((w) => [w, false]));
-    wishesShown.forEach(([w, m], i) => lsky.appendChild(lanternEl(w, i, m)));
+    const dense = wishesShown.length > SLOTS.length;
+    $("#lsky").classList.toggle("is-dense", dense);
+    if (dense) {
+      const cols = Math.max(3, Math.min(7, Math.floor(lsky.clientWidth / COL_PX) || 3));
+      const rows = Math.ceil(wishesShown.length / cols);
+      const field = document.createElement("div"); field.className = "lsky__field";
+      field.style.height = rows * ROW_PX + "px";
+      wishesShown.forEach(([w, m], i) => field.appendChild(lanternEl(w, i, m, fieldSpot(i, cols, rows))));
+      lsky.appendChild(field);
+    } else {
+      wishesShown.forEach(([w, m], i) => lsky.appendChild(lanternEl(w, i, m)));
+    }
     // fill the rest of the sky with softly glowing unnamed lanterns
     for (let i = wishesShown.length; i < 13; i++) {
       const [x, y, sc] = SLOTS[i];
@@ -739,6 +759,8 @@
   }
   loadWishes();
   if (backend) setInterval(loadWishes, 60000); // new wishes appear for everyone without reloading
+  let skyResize = null; // a busy sky re-flows its rows when the screen width changes (e.g. phone rotated)
+  addEventListener("resize", () => { clearTimeout(skyResize); skyResize = setTimeout(() => { if ($("#lsky").classList.contains("is-dense")) renderWall(approved || []); }, 300); });
   wForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const message = wMsg.value.trim(), name = $("#wName").value.trim();

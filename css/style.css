@@ -268,6 +268,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .person--groom .person__photo{border-radius:6px 6px 999px 999px}
 .person__body h3{font-size:var(--step-3);margin-top:8px}
 .person__body h3 span{font-style:italic;color:var(--muted)}
+.person__parents{margin-top:6px;font-family:var(--f-display);font-style:italic;font-size:.95rem;letter-spacing:.01em;color:var(--muted)}
 .person__intro{font-family:var(--f-display);font-style:italic;font-size:var(--step-1);line-height:1.4;margin-top:14px;color:var(--ink)}
 .person__about{margin-top:12px;color:var(--muted)}
 .facts{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;margin:22px 0 0;padding-top:18px;border-top:1px solid var(--line)}
@@ -505,6 +506,11 @@ textarea{resize:vertical;min-height:90px}
 .lsky__stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.7;animation:twinkle 3s ease-in-out infinite}
 .lsky__hint{position:absolute;z-index:2;top:16px;left:0;right:0;text-align:center;font-family:"Caveat","Segoe Print",cursive;font-weight:700;font-size:1.3rem;color:#fff;text-shadow:0 1px 6px rgba(31,45,77,.35)}
 .lsky__lanterns{position:absolute;inset:44px 10px 10px}
+/* a busy sky (17+ wishes) scrolls inside its frame; the bottom edge fades to hint there's more */
+.lsky.is-dense .lsky__lanterns{overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(255,220,160,.5) transparent;
+  -webkit-mask-image:linear-gradient(#000 88%,transparent);mask-image:linear-gradient(#000 88%,transparent)}
+.lsky__field{position:relative;width:100%;margin:16px 0 56px}
+.lsky.is-dense .lan__name{max-width:6em;font-size:1.05rem}
 .lsky__empty{position:absolute;z-index:2;left:20px;right:20px;bottom:18px;text-align:center;font-family:var(--f-display);font-style:italic;font-size:1.05rem;color:#4b4060;line-height:1.5}
 .lan{position:absolute;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px;border:0;background:none;cursor:pointer;transform:translate(-50%,-50%) scale(var(--sc,1));animation:lanBob 6s ease-in-out infinite}
 .lan:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:12px}
@@ -513,7 +519,7 @@ textarea{resize:vertical;min-height:90px}
   box-shadow:0 0 18px 6px rgba(255,176,84,.55),0 0 46px 16px rgba(255,150,70,.25);animation:lanGlow 3s ease-in-out infinite}
 .lan__body::before{content:"";position:absolute;inset:3px 5px;border-radius:inherit;background:repeating-linear-gradient(90deg,rgba(180,70,20,.28) 0 1px,transparent 1px 7px);opacity:.8}
 .lan__body::after{content:"";position:absolute;left:30%;right:30%;bottom:-3px;height:4px;border-radius:2px;background:#8a3a14}
-.lan__name{font-family:"Caveat","Segoe Print",cursive;font-weight:700;font-size:1.15rem;line-height:1;color:#fff;text-shadow:0 1px 6px rgba(31,45,77,.5);white-space:nowrap;max-width:9em;overflow:hidden;text-overflow:ellipsis}
+.lan__name{font-family:"Caveat","Segoe Print",cursive;font-weight:700;font-size:1.15rem;line-height:1;color:#fff;text-shadow:0 1px 6px rgba(31,45,77,.5);white-space:nowrap;max-width:9em;overflow:hidden;text-overflow:ellipsis;padding:0 .2em .1em}
 .lan:hover .lan__body{box-shadow:0 0 24px 10px rgba(255,190,100,.75),0 0 60px 24px rgba(255,150,70,.35)}
 .lan--mine .lan__name::after{content:" ✦";color:#ffe08a}
 /* couple view only: private wishes glow pale gold */

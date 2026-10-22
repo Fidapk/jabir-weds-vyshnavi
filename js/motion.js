@@ -102,6 +102,7 @@
   // bride & groom
   each(".person__photo", (el) => fx(el, "clip"));
   each(".person__body h3", (el) => splitChars(el, 150));
+  each(".person__parents", (el) => fx(el, "up", 550));
   each(".person__intro, .person__about", (el) => splitWords(el, 350));
   each(".facts", (dl) => $$(":scope > *", dl).forEach((el, n) => fx(el, "up", 300 + n * 70)));
 
