@@ -744,6 +744,7 @@
     fetch(backend + (backend.includes("?") ? "&" : "?") + "action=wishes&t=" + Date.now() + (coupleKey ? "&key=" + encodeURIComponent(coupleKey) : ""))
       .then((r) => r.json()).then((d) => {
         if (!d || !d.ok || !Array.isArray(d.wishes)) return;
+        applyLikes(d.likes); // gallery hearts arrive with the wishes
         if (coupleKey && !d.couple) { coupleKey = ""; store.set("coupleKey", ""); } // wrong or changed key: back to the guest view
         $(".lsky__hint").textContent = d.couple ? "Couple view · gold lanterns are private wishes, only for you two" : "Tap a lantern to read the wish";
         // This device keeps its own public wishes so they glow straight away; once the sheet no longer
@@ -807,7 +808,19 @@
   const HEART = '<svg viewBox="0 0 32 30" aria-hidden="true"><path d="M16 28S2 19.5 2 10.2C2 5.6 5.6 2 10 2c2.6 0 4.8 1.3 6 3.3C17.2 3.3 19.4 2 22 2c4.4 0 8 3.6 8 8.2C30 19.5 16 28 16 28z"/></svg>';
   const masonry = $("#masonry");
   const items = W.gallery;
-  const likes = store.get("likes:v2", {}); // v2: new photo set, so earlier hearts don't land on different photos
+  // Likes are shared through the Google Sheet, keyed by photo file, so every guest sees the same totals.
+  // Each device can like a photo once; a second double-tap just replays the heart.
+  const liked = store.get("liked", {});   // photos this device has liked
+  let likeCounts = {};                    // shared totals, refreshed with the wishes every minute
+  const likeKey = (it) => it.src;
+  function showLikes() {
+    $$(".tile", masonry).forEach((tile) => {
+      const k = tile.dataset.key, n = Math.max(likeCounts[k] || 0, liked[k] ? 1 : 0);
+      const l = $(".tile__like", tile); l.dataset.n = n; $("b", l).textContent = n;
+      l.classList.toggle("is-mine", !!liked[k]);
+    });
+  }
+  function applyLikes(map) { if (map && typeof map === "object") { likeCounts = map; showLikes(); } }
   items.forEach((it, i) => {
     const b = document.createElement("button");
     b.type = "button";
@@ -817,22 +830,30 @@
     b.dataset.phLabel = cap;
     fillPhoto(b, { src: it.thumb || it.src, alt: cap, position: it.position });
     const capEl = document.createElement("span"); capEl.className = "tile__cap"; capEl.textContent = cap; b.appendChild(capEl);
-    const like = document.createElement("span"); like.className = "tile__like"; like.dataset.n = likes[i] || 0;
-    like.innerHTML = HEART + "<b>" + (likes[i] || 0) + "</b>"; b.appendChild(like);
+    b.dataset.key = likeKey(it);
+    const like = document.createElement("span"); like.className = "tile__like"; like.dataset.n = 0;
+    like.innerHTML = HEART + "<b>0</b>"; b.appendChild(like);
     let last = 0, timer = null;
     b.addEventListener("click", (e) => {
       const now = Date.now();
-      if (now - last < 320) { clearTimeout(timer); last = 0; heart(b, i); return; }
+      if (now - last < 320) { clearTimeout(timer); last = 0; heart(b); return; }
       last = now;
       timer = setTimeout(() => openLb(i), 320);
     });
     masonry.appendChild(b);
   });
-  function heart(tile, i) {
-    likes[i] = (likes[i] || 0) + 1; store.set("likes:v2", likes);
-    const l = $(".tile__like", tile); l.dataset.n = likes[i]; $("b", l).textContent = likes[i];
+  showLikes();
+  function heart(tile) {
     const h = document.createElement("div"); h.innerHTML = HEART; const svg = h.firstChild; svg.classList.add("burst");
     tile.appendChild(svg); setTimeout(() => svg.remove(), 950);
+    const k = tile.dataset.key;
+    if (liked[k]) return; // already counted from this device
+    liked[k] = true; store.set("liked", liked);
+    likeCounts[k] = (likeCounts[k] || 0) + 1; showLikes(); // show it straight away
+    if (!backend) return;
+    post({ type: "like", photo: k, elapsed: Date.now() - pageOpened })
+      .then((res) => { if (res.count) { likeCounts[k] = res.count; showLikes(); } })
+      .catch(() => { delete liked[k]; store.set("liked", liked); likeCounts[k] = Math.max(0, (likeCounts[k] || 1) - 1); showLikes(); }); // not saved: let them try again
   }
   // reveal for tiles created after the observer ran
   if ("IntersectionObserver" in window && !reduced) {

@@ -130,11 +130,11 @@ window.WEDDING = {
      thumb: small copy for the grid; src: full size for the enlarged view.
      position: which part of the photo stays in view when cropped to the tile.  */
   gallery: [
-    { src: "images/gallery/01-mirror-moment.jpg",     thumb: "images/gallery/01-mirror-moment-thumb.jpg",     caption: "A little mirror moment",         position: "45% 35%" },
+    { src: "images/gallery/mirror-selfie.jpg",        thumb: "images/gallery/mirror-selfie-thumb.jpg",        caption: "A little mirror moment",         position: "50% 35%" },
     { src: "images/gallery/02-our-selfie.jpg",        thumb: "images/gallery/02-our-selfie-thumb.jpg",        caption: "Our kind of selfie",             position: "35% 40%" },
     { src: "images/gallery/03-view-and-us.jpg",       thumb: "images/gallery/03-view-and-us-thumb.jpg",       caption: "Just a view and just us",        position: "42% 65%" },
     { src: "images/gallery/04-same-place.jpg",        thumb: "images/gallery/04-same-place-thumb.jpg",        caption: "Same place, new memories",       position: "28% 50%" },
-    { src: "images/gallery/05-tea-garden.jpg",        thumb: "images/gallery/05-tea-garden-thumb.jpg",        caption: "Hills and tea garden",           position: "60% 70%" },
+    { src: "images/gallery/stone-chariot.jpg",        thumb: "images/gallery/stone-chariot-thumb.jpg",        caption: "Stories carved in stone",        position: "50% 70%" },
     { src: "images/gallery/06-laughing-together.jpg", thumb: "images/gallery/06-laughing-together-thumb.jpg", caption: "Laughing together",              position: "45% 45%" },
     { src: "images/gallery/love-purest-form.jpg",     thumb: "images/gallery/love-purest-form-thumb.jpg",     caption: "Love in its purest form",        position: "50% 40%" },
     { src: "images/gallery/07-sunset-drives.jpg",     thumb: "images/gallery/07-sunset-drives-thumb.jpg",     caption: "Sunset drives",                  position: "45% 70%" },
